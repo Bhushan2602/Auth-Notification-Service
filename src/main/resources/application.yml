@@ -37,14 +37,10 @@ spring:
           auth: false
           starttls:
             enable: false
-  security:
-    oauth2:
-      client:
-        registration:
-          google:
-            client-id: ${GOOGLE_CLIENT_ID:}
-            client-secret: ${GOOGLE_CLIENT_SECRET:}
-            scope: openid, profile, email
+  # Google OAuth2 credentials come ONLY from environment (never committed):
+  #   SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_GOOGLE_CLIENT_ID
+  #   SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_GOOGLE_CLIENT_SECRET
+  # When absent, SecurityConfig skips oauth2Login and the app runs local-auth only.
 
 app:
   jwt:

@@ -1,8 +1,10 @@
 package com.authplatform.security;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -20,7 +22,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private final OAuth2LoginHandler oAuth2LoginHandler;
+    private final ObjectProvider<OAuth2LoginHandler> oAuth2Handler;
+    private final Environment env;
 
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
@@ -29,6 +32,10 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        String googleId = env.getProperty("spring.security.oauth2.client.registration.google.client-id", "");
+        if (!googleId.isBlank() && oAuth2Handler.getIfAvailable() != null) {
+            http.oauth2Login(oauth -> oauth.successHandler(oAuth2Handler.getObject()));
+        }
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -41,7 +48,6 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
-                .oauth2Login(oauth -> oauth.successHandler(oAuth2LoginHandler))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
