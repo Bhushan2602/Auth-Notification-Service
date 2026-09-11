@@ -74,7 +74,7 @@ Cross-module rule: modules call each other only through service methods/events, 
 - Java 21+, Node.js 18+, Docker & Docker Compose, Maven 3.9+
 
 ```bash
-git clone https://github.com/<your-username>/Auth-Notification-Service.git
+git clone https://github.com/Bhushan2602/Auth-Notification-Service.git
 cd Auth-Notification-Service
 cp .env.example .env
 docker compose up --build -d
